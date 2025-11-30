@@ -3,80 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <title>Smart Task Analyzer</title>
-    <link rel="stylesheet" href="/static/styles.css">
+
+    <!-- Responsive -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/styles.css">
+
+    <!-- Icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-VI1mE4bJ7Kqj9v+M0uDftz5TPmrh+0aBSebxax05Ip+z5sC/ySbH9Q1oXH3+KzvVZ2hYqEoKPLhI7l3kT+BS5Q=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>Smart Task Analyzer</h1>
-        <p>Paste tasks or use the form, choose a strategy, and let the app prioritize your work.</p>
-    </header>
 
-    <main class="layout">
-        <!-- LEFT SIDE: INPUT -->
-        <section class="panel">
-            <h2>Add Task (Form)</h2>
-            <form id="taskForm">
-                <label>
-                    Title
-                    <input type="text" id="title" required>
-                </label>
+<!-- ================================
+     HEADER
+=================================== -->
+<header class="app-header">
+    <div class="header-content">
+        <div>
+            <h1>Smart Task Analyzer</h1>
+            <p>Plan smarter. Prioritize tasks with AI-driven strategy.</p>
+        </div>
+        <button id="darkModeToggle" class="btn-accent btn-small">
+            <i class="fas fa-moon"></i> Dark Mode
+        </button>
+    </div>
+</header>
 
-                <label>
-                    Due Date (YYYY-MM-DD)
-                    <input type="date" id="due_date">
-                </label>
+<!-- ================================
+     MAIN LAYOUT
+=================================== -->
+<div class="main-wrapper">
 
-                <label>
-                    Estimated Hours
-                    <input type="number" id="estimated_hours" min="1" value="1">
-                </label>
+    <!-- ============================
+         LEFT SIDE — TASK CREATION
+    ============================= -->
+    <aside class="glass-card sidebar">
+        <h2 class="section-title">Add Task</h2>
 
-                <label>
-                    Importance (1-10)
-                    <input type="number" id="importance" min="1" max="10" value="5">
-                </label>
+        <form id="taskForm">
 
-                <label>
-                    Dependencies (IDs, comma separated)
-                    <input type="text" id="dependencies" placeholder="e.g. 1,2,3">
-                </label>
+            <label>
+                Task Title
+                <input type="text" id="title" required placeholder="e.g., Prepare report">
+            </label>
 
-                <button type="submit">Add Task</button>
-            </form>
+            <label>
+                Due Date
+                <input type="date" id="due_date">
+            </label>
 
-            <h2>Current Task List</h2>
-            <pre id="taskListPreview" class="preview"></pre>
+            <label>
+                Estimated Hours
+                <input type="number" id="estimated_hours" min="1" value="1">
+            </label>
 
-            <h2>Bulk JSON Input</h2>
-            <textarea id="taskInput" rows="6" placeholder='[{"title": "...", "due_date": "2025-11-30", ...}]'></textarea>
-            <button id="loadJsonBtn">Load JSON into Task List</button>
-        </section>
+            <label>
+                Importance (1–10)
+                <input type="number" id="importance" min="1" max="10" value="5">
+            </label>
 
-        <!-- RIGHT SIDE: RESULTS -->
-        <section class="panel">
-            <h2>Analyze Tasks</h2>
-            <div class="controls">
-                <label>
-                    Sorting Strategy:
-                    <select id="strategySelect">
-                        <option value="smart_balance">Smart Balance</option>
-                        <option value="fastest_wins">Fastest Wins</option>
-                        <option value="high_impact">High Impact</option>
-                        <option value="deadline_driven">Deadline Driven</option>
-                    </select>
-                </label>
-                <button id="analyzeBtn">Analyze</button>
-                <button id="suggestBtn">Suggest Top 3</button>
-            </div>
+            <label>
+                Dependencies (IDs, comma separated)
+                <input type="text" id="dependencies" placeholder="e.g. 1,2">
+            </label>
 
-            <div id="status"></div>
-            <div id="results" class="results"></div>
-        </section>
-    </main>
+            <button class="btn-primary btn-animate" type="submit">
+                Add Task
+            </button>
+        </form>
+        
+        <!-- Task List Preview (for debugging) -->
+        <div style="margin-top: 20px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px; font-size: 12px;">
+            <strong>Current Tasks:</strong>
+            <div id="taskListPreview" style="margin-top: 8px; max-height: 150px; overflow-y: auto;"></div>
+        </div>
+    </aside>
+
+    <!-- ============================
+         RIGHT SIDE — ANALYSIS
+    ============================= -->
+    <section class="glass-card content">
+
+        <h2 class="section-title">Analyze Tasks</h2>
+
+        <div class="analysis-controls">
+            <label style="flex: 1;">
+                Strategy
+                <select id="strategySelect">
+                    <option value="smart_balance">Smart Balance</option>
+                    <option value="fastest_wins">Fastest Wins</option>
+                    <option value="high_impact">High Impact</option>
+                    <option value="deadline_driven">Deadline Driven</option>
+                </select>
+            </label>
+
+            <button id="analyzeBtn" class="btn-primary btn-animate" style="flex: 1;">
+                Analyze
+            </button>
+
+            <button id="suggestBtn" class="btn-accent btn-animate" style="flex: 1;">
+                Suggest Top 3
+            </button>
+        </div>
+
+        <!-- Status / Spinner -->
+        <div id="status" class="status">
+            Ready
+            <div id="spinner" class="spinner hidden"></div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="results">
+            <!-- Task cards with "Mark as Done" buttons will be dynamically inserted here -->
+        </div>
+
+    </section>
+
 </div>
 
+<!-- ================================
+     TOAST CONTAINER
+=================================== -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ================================
+     SCRIPTS
+=================================== -->
 <script src="/static/script.js"></script>
 </body>
 </html>
